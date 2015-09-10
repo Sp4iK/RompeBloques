@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4b5079a894b23d543b1288cadb378687
+timeCreated: 1434366621
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - bolaPrefab: {fileID: 119040, guid: 9a7206a95ae949049a011cea34e88890, type: 2}
+  - explosionPrefab: {fileID: 100010, guid: 031d08f52af1daa4f929b85221519426, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

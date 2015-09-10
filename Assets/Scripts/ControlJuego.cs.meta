@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 150c342345cb4f34ea61258a6ea4ca24
+timeCreated: 1434528377
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - navePrefab: {fileID: 143700, guid: 08db80509c7d7d64f9abf3e8b38ba113, type: 2}
+  - bloquePrefab: {fileID: 137978, guid: c874289cf0afdeb4e97ed1cadd29a4b9, type: 2}
+  - posicionInicialNave: {instanceID: 0}
+  - bloqueSimple: {fileID: 2100000, guid: e0b7baa887bab61459f983ce502c4106, type: 2}
+  - bloqueMedio: {fileID: 2100000, guid: 0fa7b3c2b0411eb40a9cb7d0f3394929, type: 2}
+  - bloqueMacizo: {fileID: 2100000, guid: 2a0bbec39038bc34d87c429e522b849c, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
