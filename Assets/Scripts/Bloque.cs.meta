@@ -1,12 +1,12 @@
 fileFormatVersion: 2
 guid: 4209bc42e7ba6bc4c9fb6f5f8005a57c
-timeCreated: 1434094064
+timeCreated: 1445886446
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
   defaultReferences:
-  - materialRoto: {fileID: 2100000, guid: cc919ef6a0057d541926b394ee66f7e6, type: 2}
-  - materialMuyRoto: {fileID: 2100000, guid: c632611dad7ec0c45b241e8e0b0f1ca1, type: 2}
+  - materialRoto: {fileID: 2100000, guid: e4668734c8ca38140a86742976eaef9a, type: 2}
+  - materialMuyRoto: {fileID: 2100000, guid: c6dbb7d7f990dd442a0c815c4af33c45, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

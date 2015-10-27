@@ -1,0 +1,9 @@
+SOUND LICENSES
+==============
+- 00UE - break - chipped.wav (menu.wav) by mastertronic @ https://www.freesound.org/people/mastertronic/sounds/54852/ [Creatrive Commons Sampling Plus License]
+- Atari XL Beat 5.wav (juego1.wav) by bombstu @ https://www.freesound.org/people/bombstu/sounds/159063/ [Creative Commons 0 License]
+- Atari ST Beat 06.wav (juego2.wav) by bombstu @ https://www.freesound.org/people/bombstu/sounds/159072/ [Creative Commons 0 License]
+- Atari ST Beat 12.wav (juego3.wav) by bombstu @ https://www.freesound.org/people/bombstu/sounds/159080/ [Creative Commons 0 License]
+- Pop!.wav (pop.wav) by kwahmah_02 @ https://www.freesound.org/people/kwahmah_02/sounds/260614/ [Creative Commons Attribution License]
+- 8 Bit Explosion (explosion.wav) by thehorriblejoke @ https://www.freesound.org/people/thehorriblejoke/sounds/259962/ [Creative Commons 0 License]
+- Sifi.wav (teleportar.wav) by 2887679652 @ https://www.freesound.org/people/2887679652/sounds/194832/ [Creative Commons Attribution License]

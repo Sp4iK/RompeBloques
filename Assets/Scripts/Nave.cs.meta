@@ -1,12 +1,15 @@
 fileFormatVersion: 2
 guid: 4b5079a894b23d543b1288cadb378687
-timeCreated: 1434366621
+timeCreated: 1445944584
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - bolaPrefab: {fileID: 119040, guid: 9a7206a95ae949049a011cea34e88890, type: 2}
-  - explosionPrefab: {fileID: 100010, guid: 031d08f52af1daa4f929b85221519426, type: 2}
+  - explosionPrefab: {fileID: 100012, guid: 06cff0f24d5664781859b6da3e421fa4, type: 2}
+  - teleportPrefab: {fileID: 100008, guid: c315731710b634ac1907e6aceca06447, type: 2}
+  - clipTeleportar: {fileID: 8300000, guid: f9e21ad22f4e6ee45b076194673d1191, type: 3}
+  - clipExplosion: {fileID: 8300000, guid: 21e306afd474ffd40bb1c885e7ee8477, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

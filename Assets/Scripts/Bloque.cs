@@ -8,7 +8,7 @@ public class Bloque : MonoBehaviour {
 	public tipoBloque tipo;
 	public int valorBloque;
 	public Material materialRoto, materialMuyRoto;
-	ControlJuego control;
+	ControlJuego controlJuego;
 	Renderer renderizador;
 	int golpeado = 0;
 
@@ -16,39 +16,36 @@ public class Bloque : MonoBehaviour {
 	AudioSource audioSource;
 
 	void Start () {
-		// Obtenemos el componente de audio
+		controlJuego = ControlJuego.instance;
+
+		// Obtenemos el componente de audio y renderer
 		audioSource = GetComponent<AudioSource>();
-
-		valorBloque = ((int)tipo + 1) * 100;
-	}
-
-	void OnTriggerEnter (Collider other) {
-		control = GameObject.FindGameObjectWithTag("GameController").GetComponent<ControlJuego>();
 		renderizador = GetComponent<Renderer>();
 
-		if (other.tag == "bola") {
-			audioSource.Play();
+		valorBloque = ((int)tipo + 1) * 10;
+	}
 
-			if (tipo == tipoBloque.Simple || golpeado >= 2 || (tipo == tipoBloque.Medio && golpeado == 1)) {
-				//Debug.Log("dentro del if | tipoBloque: " + tipo + " & golpeado: " + golpeado);
+	void OnCollisionEnter (Collision col) {
+		if (col.gameObject.tag == "bola") {
+			audioSource.Play();
+			golpeado++;
+
+			if (golpeado == (int)tipo + 1) {
 				StartCoroutine(DestruirBloque());
-				control.RestaBloque();
-				control.SumaPuntos(valorBloque);
+				controlJuego.RestaBloque();
+				controlJuego.SumaPuntos(valorBloque);
 			} else {
-				if ((tipo == tipoBloque.Macizo && golpeado >= 1) || tipo == tipoBloque.Medio) {
-					//Debug.Log ("dentro del else - if | tipoBloque: " + tipo + " & golpeado: " + golpeado);
+				if ((tipo == tipoBloque.Macizo && golpeado >= 2) || tipo == tipoBloque.Medio) {
 					//renderizador.materials[1] = materialMuyRoto;
 					Material[] materiales = renderizador.materials;
 					materiales[1] = materialMuyRoto;
 					renderizador.materials = materiales;
 				} else {
-					//Debug.Log ("dentro del else - else | tipoBloque: " + tipo + " & golpeado: " + golpeado);
 					//renderizador.materials[1] = materialRoto;
 					Material[] materiales = renderizador.materials;
 					materiales[1] = materialRoto;
 					renderizador.materials = materiales;
 				}
-				golpeado++;
 			}
 		}
 	}

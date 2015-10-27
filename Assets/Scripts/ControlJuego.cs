@@ -2,39 +2,51 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
+[RequireComponent(typeof(AudioSource))]
 public class ControlJuego : MonoBehaviour {
+	
+	// Instancia global
+	public static ControlJuego instance;
 
-	//'static' es usado para preservar su valor durante la ejecucion del programa, independientemente de las escenas
-	//[HideInInspector] por encima de las variables sirve para ocultarlas en el inspector
-
+	// Objetos necesarios para el juego
 	public GameObject navePrefab;
 	public GameObject posicionInicialNave;
 	public GameObject bloquePrefab;
 	GameObject nave;
 	GameObject[] bloquesCreados;
+	AudioSource audioSource;
 
+	// Materiales para los bloques
 	public Material bloqueSimple, bloqueMedio, bloqueMacizo;
 
-	public static int vidasRestantes, tiempo, bloquesACrear, puntuacionTotal;
-	public bool aleatorio = true;
-	int bloques;
-	int puntuacion, vidas;
+	// Clips para la musica
+	public AudioClip[] audioClips;
+	
+	// Parametros locales
+	int bloques, puntuacion, vidas;
 	float tiempoRestante;
 
-	// La referencia al texto en pantalla
-	public Text txtPuntuacion, txtVidas, txtTiempo;
+	// Referencia al controlador del UI
+	ControlUI controlUI;
 
-	// Referencia a la ventana emergente para poder mostrarla
-	public FinJuego finJuego;
+	// Referencia a los parametros globales
+	ParametrosGlobales parametrosGlobales;
+	
+	// Estado de ejecucion del juego
+	public enum ESTADO {Jugando, Pausa, FinNivel, FinJuego};
+	[HideInInspector] public static ESTADO estado;
 
-	// Referencia al animator del panel de pausa
-	public Animator animatorPausa;
-
-	[HideInInspector]
-	public enum ESTADO {Jugando, Pausa, Finalizado};
-	ESTADO estado;
+	void Awake () {
+		instance = this;
+	}
 
 	void Start () {
+		controlUI = ControlUI.instance;
+		parametrosGlobales = ParametrosGlobales.instance;
+		audioSource = GetComponent<AudioSource>();
+		audioSource.clip = audioClips[Random.Range(0, audioClips.Length)];
+		audioSource.mute = ParametrosGlobales.instance.musicaOff;
+		if (!audioSource.mute) audioSource.Play();
 		InicializarEscena();
 		InicializarNave();
 		estado = ESTADO.Jugando;
@@ -42,52 +54,56 @@ public class ControlJuego : MonoBehaviour {
 
 	void Update () {
 		tiempoRestante -= Time.deltaTime;
-		if (estado != ESTADO.Finalizado) txtTiempo.text = Mathf.RoundToInt(tiempoRestante).ToString();
+		// Actualizamos el marcador del tiempo, solo si estamos jugando y no en pausa
+		if (estado == ESTADO.Jugando) controlUI.txtTiempo.text = Mathf.RoundToInt(tiempoRestante).ToString();
 
+		// Si se pulsa 'Esc' (PC) o 'Atras' (movil)...
 		if (Input.GetKeyDown(KeyCode.Escape)) {
 			estado = ESTADO.Pausa;
 			// Llamada a funcion para mostrar menu de pausa
 			Pausa((int)estado);
 		}
 
-		if (Input.GetKeyDown(KeyCode.Space) && estado == ESTADO.Finalizado) {
-			ReiniciarJuego();
-		}
-
-		if (bloques <= 0 && estado != ESTADO.Finalizado) {
+		// Si has terminado con todos los bloques...
+		if (bloques <= 0 && estado == ESTADO.Jugando) {
 			Fin();
 		}
 
-		if (tiempoRestante <= 0f && estado != ESTADO.Finalizado) {
+		// Si se ha acabado el tiempo...
+		if (tiempoRestante <= 0f && estado == ESTADO.Jugando) {
 			Debug.Log("¡SE ACABO EL TIEMPO!");
 			Fin();
 		}
 	}
 	
 	void InicializarNave () {
+		// Instanciacion de la nave en la escena
 		nave = (GameObject) Instantiate(navePrefab, posicionInicialNave.transform.position, Quaternion.identity);
+		estado = ESTADO.Jugando;
 	}
 	
 	void InicializarEscena () {
-		tiempoRestante = tiempo;
-		txtTiempo.text = tiempoRestante.ToString();
+		// Inicializacion de los parametros
 		puntuacion = 0;
-		vidas = vidasRestantes;
-		txtPuntuacion.text = "PUNTUACION:\n" + puntuacion;
-		txtVidas.text = "VIDAS: " + vidas;
+		vidas = parametrosGlobales.vidasRestantes;
+		tiempoRestante = parametrosGlobales.tiempo;
+		controlUI.txtTiempo.text = tiempoRestante.ToString();
+		controlUI.txtPuntuacion.text = "PUNTUACION:\n" + puntuacion;
+		controlUI.txtVidas.text = "VIDAS: " + vidas;
+		float espacioInferior = ((parametrosGlobales.nivel - 1) * -0.5f);
 
-		if (aleatorio) {
-			bloquesCreados = new GameObject[bloquesACrear];
+		// Creacion y posicionamiento de los bloques
+		bloquesCreados = new GameObject[parametrosGlobales.bloquesACrear];
 
-			for (int i=0; i<bloquesACrear; i++) {
-				float posX = Random.Range(-2.6f, 2.6f);
-				float posZ = Random.Range(0f, 4f);
-				Vector3 posicionBloque = new Vector3(posX, 0.25f, posZ);
-				bloquesCreados[i] = (GameObject) Instantiate(bloquePrefab, posicionBloque, Quaternion.Euler(0f, 0f, 90f));
-				int bloqueTipo = Random.Range(0,3);
-				bloquesCreados[i].GetComponent<Bloque>().tipo = (Bloque.tipoBloque) bloqueTipo;
+		for (int i = 0; i < parametrosGlobales.bloquesACrear; i++) {
+			float posX = Random.Range(-2.6f, 2.6f);
+			float posZ = Random.Range(espacioInferior, 4f);
+			Vector3 posicionBloque = new Vector3(posX, 0.25f, posZ);
+			bloquesCreados[i] = (GameObject) Instantiate(bloquePrefab, posicionBloque, Quaternion.Euler(0f, 0f, 90f));
+			int bloqueTipo = Random.Range(0, 3);
+			bloquesCreados[i].GetComponent<Bloque>().tipo = (Bloque.tipoBloque) bloqueTipo;
 
-				switch (bloqueTipo) {
+			switch (bloqueTipo) {
 				case 0:
 					bloquesCreados[i].GetComponent<Renderer>().material = bloqueSimple;
 					break;
@@ -97,14 +113,16 @@ public class ControlJuego : MonoBehaviour {
 				case 2:
 					bloquesCreados[i].GetComponent<Renderer>().material = bloqueMacizo;
 					break;
-				}
-
-				if (i > 0) bloquesCreados[i].transform.position = CompruebaSuperposicion(posicionBloque, i);
 			}
+
+			// Comprueba que los bloques no se superpongan
+			if (i > 0) bloquesCreados[i].transform.position = CompruebaSuperposicion(posicionBloque, i);
 		}
 
-		bloques = GameObject.FindGameObjectsWithTag("bloque").Length;
-		Debug.Log("Bloques: " + bloques);
+		bloques = bloquesCreados.Length;
+		Debug.Log("Dificultad " + parametrosGlobales.dificultadGlobal.ToString() + " | Bloques: " + bloques);
+
+		estado = ESTADO.Jugando;
 	}
 
 	public void RestaBloque () {
@@ -113,65 +131,85 @@ public class ControlJuego : MonoBehaviour {
 
 	public void SumaPuntos (int puntos) {
 		puntuacion += puntos;
-		txtPuntuacion.text = "PUNTUACION:\n" + puntuacion;
+		controlUI.txtPuntuacion.text = "PUNTUACION:\n" + puntuacion;
 	}
 
-	public void Pausa (int estado) {
-		switch (estado) {
-		case (int)ESTADO.Pausa:
-			animatorPausa.SetInteger("estado", estado);
-			animatorPausa.speed = 5f;
-			Time.timeScale = 0.001f;
-			break;
-		case (int)ESTADO.Jugando:
-			animatorPausa.SetInteger("estado", estado);
-			Time.timeScale = 1f;
-			break;
-		case -1:
-			Application.LoadLevel(0);
-			break;
+	public void Pausa (int estadoPausa) {
+		switch (estadoPausa) {
+			case (int)ESTADO.Pausa:
+				controlUI.MostrarPausa();
+				audioSource.Pause();
+				Time.timeScale = 0.001f;
+				break;
+			case (int)ESTADO.Jugando:
+				controlUI.OcultarPausa();
+				audioSource.UnPause();
+				Time.timeScale = 1f;
+				estado = ESTADO.Jugando;
+				break;
+			case -1:
+				Time.timeScale = 1f;
+				Application.LoadLevel(0);
+				break;
 		}
 	}
 
 	public void Fin () {
-		Destroy(nave.gameObject);
+		// Destruimos la bola
 		Destroy(GameObject.FindGameObjectWithTag("bola").gameObject);
 
-		if (vidas <= 0) {
-			estado = ESTADO.Finalizado;
-			Debug.Log("HAS PERDIDO, ¡PAQUETE!" + "\n" + "PUNTUACION: " + puntuacion);
-			txtVidas.CrossFadeAlpha(0f, 1f, true);
-			txtTiempo.CrossFadeAlpha(0f,1f, true);
-			txtPuntuacion.CrossFadeAlpha(0f, 1f, true);
-			finJuego.Mostrar("HAS PERDIDO, ¡PAQUETE!", puntuacion);
-		} else if (bloques <= 0) {
-			estado = ESTADO.Finalizado;
-			puntuacionTotal += puntuacion * (int) tiempoRestante * vidas / 10;
-			Debug.Log("¡HAS GANADO!" + "\n" + "PUNTUACION NIVEL: " + (puntuacion * (int) tiempoRestante * vidas / 10) + "| PUNTUACION TOTAL: " + puntuacionTotal);
-			txtVidas.CrossFadeAlpha(0f, 1f, true);
-			txtTiempo.CrossFadeAlpha(0f,1f, true);
-			txtPuntuacion.CrossFadeAlpha(0f, 1f, true);
-			finJuego.Mostrar("¡HAS GANADO!", puntuacionTotal);
+		if (bloques <= 0) {
+			nave.GetComponent<Nave>().DestruirNave(Nave.TipoDestruccion.Teleportar);
+			estado = ESTADO.FinNivel;
+			int vidasNivel = (vidas > 0) ? vidas : 1;
+			puntuacion = (puntuacion * (int)tiempoRestante * vidasNivel) / 10;
+			parametrosGlobales.puntuacionTotal += puntuacion;
+			Debug.Log("¡HAS GANADO!" + "\n" + "PUNTUACION NIVEL: " + puntuacion + " | PUNTUACION TOTAL: " + parametrosGlobales.puntuacionTotal);
+			controlUI.MostrarFinJuego("¡HAS GANADO!", puntuacion);
+		} else if (vidas <= 0) {
+			nave.GetComponent<Nave>().DestruirNave(Nave.TipoDestruccion.Destruir);
+			estado = ESTADO.FinJuego;
+			parametrosGlobales.puntuacionTotal += (puntuacion * (int)tiempoRestante) / 10;
+			Debug.Log("HAS PERDIDO, ¡PAQUETE!" + "\n" + "PUNTUACION NIVEL: " + ((puntuacion * (int)tiempoRestante) / 10) + " | PUNTUACION TOTAL: " + parametrosGlobales.puntuacionTotal);
+			controlUI.MostrarFinJuego("HAS PERDIDO, ¡PAQUETE!", parametrosGlobales.puntuacionTotal);
 		} else {
-			vidas--;
-			txtVidas.text = "VIDAS: " + vidas;
-			InicializarNave();
-			tiempoRestante = tiempo;
-			Debug.Log("VUELVE A INTENTARLO" + "\n" + "VIDAS: " + vidas);
+			nave.GetComponent<Nave>().DestruirNave(Nave.TipoDestruccion.Destruir);
+			estado = ESTADO.Pausa;
+			if (tiempoRestante <= 0f) controlUI.MostrarTimeout();
+			Invoke("QuitarVida", 2f);
 		}
 	}
 
-	public void ReiniciarJuego () {
+	private void QuitarVida () {
+		vidas--;
+		controlUI.txtVidas.text = "VIDAS: " + vidas;
+		InicializarNave();
+		tiempoRestante = parametrosGlobales.tiempo;
+		Debug.Log("VUELVE A INTENTARLO" + "\n" + "VIDAS: " + vidas);
+	}
+
+	public void ContinuarJuego () {
 		// Lanzar la animacion de ocultar la ventana
-		finJuego.Ocultar();
-		Debug.Log("JUEGO REINICIADO");
-		// Lanzamos la corrutina
+		controlUI.OcultarFinJuego();
+		// Ajustamos los parametros para el siguiente nivel
+		parametrosGlobales.vidasRestantes = vidas;
+		parametrosGlobales.tiempo -= 5 * ((int)parametrosGlobales.dificultadGlobal + 1);
+		parametrosGlobales.bloquesACrear += 5 * ((int)parametrosGlobales.dificultadGlobal + 1);
+		parametrosGlobales.nivel++;
+		Debug.Log("SIGUIENTE NIVEL");
 		StartCoroutine(EsperarYCargar(2f, Application.loadedLevel));
 	}
 
 	public void Salir () {
-		finJuego.Ocultar();
+		controlUI.OcultarFinJuego();
+		// Si la puntuacion ha sido la mas alta, se guarda
+		if (parametrosGlobales.puntuacionTotal > HighScoreManager.instance.GetHighestScore().score) GuardarPuntuacion();
 		StartCoroutine(EsperarYCargar(2f, 0));
+	}
+
+	private void GuardarPuntuacion () {
+		if (parametrosGlobales.nombreJugador.Length == 0) parametrosGlobales.nombreJugador = "AAA";
+		HighScoreManager.instance.SaveHighScore(parametrosGlobales.nombreJugador, parametrosGlobales.puntuacionTotal);
 	}
 
 	private IEnumerator EsperarYCargar (float segundos, int nivel) {
@@ -181,14 +219,21 @@ public class ControlJuego : MonoBehaviour {
 	}
 
 	Vector3 CompruebaSuperposicion (Vector3 pos, int cont) {
-		for (int i=0; i<cont; i++) {
+		int contador = 0; // Contador de intentos, para que no se bloquee.
+
+		for (int i = 0; i < cont; i++) {
 			float distancia = Vector3.Distance(pos, bloquesCreados[i].transform.position);
 
-			if (distancia < 1) {
+			if (distancia < 1 && contador < 10) {
+				contador++;
+
 				pos.x = Random.Range(-2.6f, 2.6f);
 				pos.z = Random.Range(0f, 4f);
 
 				i = 0;
+			} else {
+				contador = 0;
+				break;
 			}
 		}
 
